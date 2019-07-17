@@ -1,0 +1,94 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct ListNode {   //평범한 리스트노드
+	int coef;
+	int expon;
+	struct ListNode* link;
+}ListNode;
+typedef struct ListHeader {    //리스트헤더
+	int length;     //개수에 해당
+	ListNode* head;     //머리쪽
+	ListNode* tail;    //꼬리쪽
+}ListHeader;
+void init(ListHeader* plist) {     //값을 초기화
+	plist->length = 0;
+	plist->head = plist->tail = NULL;
+}
+void insert_node_last(ListHeader*plist, int coef, int expon) {   //노드삽입
+	ListNode*temp = (ListNode*)malloc(sizeof(ListNode));
+	temp->coef = coef;
+	temp->expon = expon;
+	temp->link = NULL;
+	if (plist->tail == NULL) {    //첫번째 노드였다연
+		plist->head = plist->tail = temp;
+	}
+	else {
+		plist->tail->link = temp;     //head는 움직이지 않는다.tail은 2번째 노드로
+		plist->tail = temp;           //첫번째 노드와 두번째 노드 연결
+	}
+	plist->length++;     //리스트의 길이 1씩 증가
+}
+void poly_print(ListHeader* plist) {    //리스트 출력
+	ListNode* p = plist->head;     //p는 노드의 헤드를 가리킨다
+	for (; p; p = p->link) {        //p가 계속될때까지
+		printf("%d, %d \n", p->coef, p->expon);
+	}
+}
+void poly_add(ListHeader* plist1, ListHeader* plist2, ListHeader* plist3) {
+	ListNode* a = plist1->head;    //a식의 출발점
+	ListNode* b = plist2->head;    //b식의 출발점
+	int sum;
+	while (a != NULL && b != NULL) {
+		if (a->expon == b->expon) {     //두개의 지수가 같을때
+			sum = a->coef + b->coef;
+			insert_node_last(plist3, sum, a->expon);  //plist3 생성
+			a = a->link;
+			b = b->link;
+		}
+		else if (a->expon > b->expon) {      //a의 지수가 클때
+			insert_node_last(plist3, a->coef, b->expon);  //plist3에 A삽입
+			a = a->link;
+		}
+		else {  //  a->expon < b->expon   b의 지수가 클때
+			insert_node_last(plist3, b->coef, b->expon);   //plist3에 B삽입
+			b = b->link;
+
+		}
+	}
+	//a나b중에 남은 것이 있다면
+	if (a != NULL) {  //A가 남는다면
+		for (; a != NULL; a = a->link) {
+			insert_node_last(plist3, a->coef, a->expon);
+		}
+	}
+	if (b != NULL) {   //B가 남는다면
+		for (; b != NULL; a = a->link) {
+			insert_node_last(plist3, b->coef, b->expon);
+		}
+	}
+}
+int main() {
+	ListHeader list1, list2, list3;
+	init(&list1);
+	init(&list2);
+	init(&list3);
+
+	insert_node_last(&list1, 3, 12);
+	insert_node_last(&list1, 2, 8);
+	insert_node_last(&list1, 1, 0);
+
+	insert_node_last(&list2, 8, 12);
+	insert_node_last(&list2, -3, 10);
+	insert_node_last(&list2, 10, 6);
+	printf("첫번째 다항식\n");
+	poly_print(&list1);
+	printf("두번째 다항식\n");
+	poly_print(&list2);
+	printf("\n");
+	//덧셈
+	poly_add(&list1, &list2, &list3);
+	printf("결과 : \n");
+	poly_print(&list3);
+
+}
