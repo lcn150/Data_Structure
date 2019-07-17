@@ -1,0 +1,147 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef int element;
+typedef struct StackNode{ //평범한 노드 생성
+	element data;
+	struct StackNode* link;
+}StackNode;
+typedef struct{
+	StackNode* top; //스택을 가리키는 top포인터 생성
+}LinkedStackType;
+
+void init(LinkedStackType* s){
+	s->top = NULL;  //배열에서는 s->top =-1
+}
+
+void push(LinkedStackType* s, element item){
+	StackNode* temp = (StackNode*)malloc(sizeof(StackNode)); //item을 넣기위해 temp생성
+	if(temp ==NULL){    //오버플로는 아니다
+		printf("메모리 할당 에러 \n");
+		return;
+	}
+	else{
+    	temp->data = item;
+	    temp->link =s->top;
+     	s->top = temp;
+	}
+}
+void display(LinkedStackType* s){
+    StackNode* tmp = s->top;  //StackNode로 선언된tmp가 s와 호환
+	while(tmp !=NULL){
+		printf("%d -> ",tmp->data);
+		tmp = tmp->link;
+	}
+}
+int is_empty(LinkedStackType* s){
+	return (s->top ==NULL);
+}
+element pop(LinkedStackType* s){
+        StackNode* temp = s->top;
+	if(is_empty(s)){ //스택의 언더플로 체크
+		printf("스택 언더플로 에러!!\n");
+		exit(1);
+	}
+	else{
+		
+		element item = temp->data;    //30
+		s->top = s->top->link;     //temp->data;
+		free(temp);
+		return item;
+	}
+}
+element peek(LinkedStackType* s){
+	if(is_empty(s)){ //스택의 언더플로 체크
+		printf("스택 언더플로 에러!!\n");
+		exit(1);
+	}
+	else{
+		StackNode* temp = s->top;
+		element item = temp->data;    //30
+		return item;
+	}
+}
+
+int eval(const char exp[]){  //후위표기식 계산
+	LinkedStackType s;
+	//init(&s);    //초기화 오류
+	int op1, op2, value, i=0;
+	int len = strlen(exp);
+	char ch;
+	for(i=0; i<len; i++){
+		ch = exp[i];       //8
+		if(ch !='+' && ch!='-' && ch!='/' && ch!='*'){   //숫자라면
+			//숫자라면 문자타입에서 숫자타입으로 변환
+			value = ch-'0'; //문자였던 8을 숫자로 변환
+			push(&s, value);    //8과 2
+		}
+		else{    //연산자라면
+			op2 = pop(&s);   //2
+			op1 = pop(&s);   //8
+			switch(ch){
+			case'+': 
+				push(&s, op1+op2); 
+				break;
+			case'-': 
+				push(&s, op1-op2); 
+				break;
+			case'/': 
+				push(&s, op1/op2); 
+				break;
+			case'*': 
+				push(&s, op1*op2); 
+				break;
+			}
+		}
+	}
+	return pop(&s);
+}
+
+int prec(char op){
+	switch(op){
+	case'(': case')': return 0;
+	case'+': case'-': return 1;
+	case'*': case'/': return 2;
+	}
+	return -1;
+}
+void infix_to_postfix(const char exp[]){
+	LinkedStackType s;
+	init(&s);
+	char ch, top_op;
+	int len = strlen(exp);  //9
+	for(int i=0; i<len; i++){
+		ch = exp[i];
+		switch(ch){
+		case'+': case'-': case'*': case'/':
+			while(!is_empty(&s) && prec(ch) <= prec(peek(&s))) { //prec()는 우선순위를 계산해준다.
+				printf("%c", pop(&s));
+			}
+			push(&s, ch);
+			break;
+		case'(':     //괄호가 있을 경우
+			push(&s, ch); break;
+		case')':
+		    top_op = pop(&s);
+			while(top_op !='('){  //이것이 나올때까지
+				printf("%c", top_op);  //출력하고
+				top_op = pop(&s);   //삭제
+			}
+			break;
+		default: 
+			printf("%c", ch);
+			break;
+		}
+	}
+	while(!is_empty(&s)){
+		printf("%c", pop(&s));
+	}
+}
+int main(){
+	infix_to_postfix("a+b*c");
+	printf("\n-----------------\n");
+	int result;
+	result = eval("82/3-32*+");
+	printf("결과값은 %d \n", result);
+	
+}
