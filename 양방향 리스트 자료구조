@@ -1,0 +1,28 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef int element;
+typedef struct DlistNode{
+	element data;
+	struct DlistNode* rlink;
+	struct DlistNode* llink;
+}DlistNode;
+void init(DlistNode* head){
+	head->rlink = head;
+	head->llink = head;
+}
+void dinsert_node(DlistNode* before, DlistNode* new_node){
+	new_node->rlink = before;
+	new_node->llink = before->rlink;
+	before->rlink->llink = new_node;
+	before->rlink = new_node;
+}
+int main(){
+	DlistNode head_node;
+	DlistNode* p[10];
+	init(&head_node);
+	for(int i=0; i<5; i++){
+		p[i] = (DlistNode*)malloc(sizeof(DlistNode));
+		p[i]->data = i;
+		dinsert_node(&head_node, p[i]);
+	}
+}
