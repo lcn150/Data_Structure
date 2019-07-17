@@ -1,0 +1,147 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct TreeNode{
+	int key;
+	struct TreeNode* right, * left;
+}TreeNode;
+void insert_node(TreeNode* *root, int key){
+	TreeNode* t, * p; //t와p가 있어야 삽입에 용이함
+	TreeNode* n;
+	t = *root;
+	p = NULL; //값 넣을때 필요한 p
+	// 중복값을 검사함 가장 먼저 검사하는 것 t포인터 사용
+	while(t !=NULL){
+		if(key ==t->key ) return;
+		p =t;   //부모 노드를 찍어놓고 내려감 (중요)
+		if(key < p->key)
+			t = p->left;
+		else{
+			t = p->right;
+		}
+	}
+	//새로 삽입되는 노드의 생성
+	n = (TreeNode*)malloc(sizeof(TreeNode));  //포인터n 사용
+	if(n==NULL) return;
+	n->key = key;
+	n->left = n->right = NULL;
+
+	// 노드의 위치를 찾아 부모노드와 연결   포인터p사용
+	if(p != NULL){
+		if(key< p->key)
+		    p->left = n;
+		else
+			p->right = n;
+	}
+	else
+		*root = n;
+
+}
+void preorder(TreeNode* root){
+	if(root){
+     	printf("%4d",root->key);  //루트노드 방문
+        preorder(root->left);        //왼쪽노드 방문
+        preorder(root->right);       //오른쪽노드 방문
+	}
+}
+void inorder(TreeNode* root){
+	if(root){
+     	inorder(root->left);
+	printf("%4d",root->key);  //루트노드 방문
+	inorder(root->right);       //오른쪽노드 방문
+	}
+}
+TreeNode* search(TreeNode* root, int key){
+	while(root!=NULL){
+		if(key == root->key) return root;
+		else if(key<root->key) root =root->left;
+		else root = root->right;
+	}
+	return NULL;
+}
+void search_node(TreeNode* root){
+	int key;
+	printf("탐색할 값을 입력하세요");
+	scanf("%d", &key);
+	if(search(root, key)!=NULL)
+		printf("%d가 탐색됨", key);
+	else
+		printf("%d가 트리에 없음", key);
+}
+void delete_node(TreeNode* *root, int key){
+	TreeNode* p, * t, * child;  //
+	TreeNode* succ_p, *succ; //차수가 2인 노드 삭제시
+	p = NULL;   //부모노드
+	t = *root;
+	//키값을 찾고 부모노드의 왼쪽노드? 오른쪽 노드인가를 식별
+	while(t!=NULL && t->key!=key){ //마지막노드이거나 키값이 일치하거나
+		p = t;
+		t = (key< p->key) ? p->left : p->right;  //t와 부모노드p를 비교
+	}
+	if(t==NULL){
+		printf("트리에 노드가 없음");
+		return;
+	}
+	//case 1: 삭제노드가 단말노드인 경우
+	if(t->left ==NULL && t->right ==NULL){   //조건
+		if(p!=NULL){
+			if(p->left ==t)
+				p->left = NULL;
+			else
+				p->right = NULL;
+		}
+		else
+			*root = NULL;
+	}
+	//case 2: 삭제 노드의 자식노드의 수가 1인 경우
+	else if(t->left ==NULL || t->right ==NULL){
+		// 왼쪽 자식노드인가 오른쪽 자식노드인가
+		child = (t->left !=NULL) ? t->left : t->right;
+		if(p!=NULL){  //부모노드 p존재
+			if(p->left ==t){
+				p->left =child;
+			}
+			else
+				p->right = child;
+		}
+		else
+			* root = child; 
+	}
+	//case 3: 자식노드의 수가 2개인 경우(어렵다)
+	else{
+		//오른쪽 서브트리에서 후계자를 찾는다.
+		succ_p = t;
+		succ = t->right; //오른쪽노드에서 가장 작은값
+		//후계자를 찾아서 계속 왼쪽으로 이동한다.
+	    while(succ->left !=NULL){
+			succ_p = succ;
+			succ = succ->left;
+		}
+		//후속자의 부모와 자식을 연결
+		if(succ_p->left ==succ)
+			succ_p->left = succ->right;   //succ->right = NULL로 됨 연결이 끊어짐
+		else
+			succ_p->right = succ->right;
+		t->key = succ->key;
+		t = succ;
+	}
+    free(t);
+}
+int main(){
+	TreeNode* root = NULL;
+	insert_node(&root, 10);
+	insert_node(&root, 7);
+	insert_node(&root, 3);
+	insert_node(&root, 21);
+	insert_node(&root, 30);
+	insert_node(&root, 22);
+	insert_node(&root, 25);
+	insert_node(&root, 14);
+	preorder(root);
+	printf("\n");
+	//inorder(root);
+	//search_node(root); 
+	delete_node(&root, 3);   //3 삭제
+	delete_node(&root, 30);
+	delete_node(&root, 10); // 7 14 21 22 25
+	inorder(root);
+}
