@@ -1,0 +1,72 @@
+#include<stdio.h>
+#include<stdlib.h>    //exit(1)를 사용하기위해
+#define MAX_STACK_SIZE 5
+typedef int element;
+typedef struct StackType{
+	element stack[MAX_STACK_SIZE];    //stack[5]라고 주면 사용할때마다 코드를 바꿔줘야함(매크로사용)
+	int top;  //element가 아닌이유는 단순숫자기때문에
+}StackType;
+void init(StackType* s){     // 초기화 함수init()
+	s->top =-1;      //처음바닥은 -1번지(0,1,2,3..)
+}
+int is_full(StackType* s){     //스택검사 함수 is_full()
+	return (s->top == (MAX_STACK_SIZE -1));
+}
+void push(StackType* s, element item){    //스택에 넣는 함수push()
+	//스택이 꽉차있는지(Overflow) 검사, is_full()
+	if(is_full(s)){    //s의 주소를 스택검사
+		printf("스택 포화에러!!\n");
+		return;
+	}
+	else{
+	    s->stack[++(s->top)] =item;    //s->top+1 = 0, 0번지에  item(10)을 넣겠다
+	}
+}
+int is_empty(StackType* s){
+	return s->top ==-1; //더이상 스택에 없다.
+}
+element pop(StackType * s){
+	//스택에 underflow를 체크해라!
+	if(is_empty(s)){
+		printf("스택공백 에러!! \n");
+		exit(1);     //return x
+	}
+	else{
+	    return s->stack[(s->top)--]; //top을 리턴해주고 -1해라
+	}
+}
+element peek(StackType * s){
+	//스택에 underflow를 체크해라!
+	if(is_empty(s)){
+		printf("스택공백 에러!! \n");
+		exit(1);     //return x
+	}
+	else{
+	    return s->stack[s->top]; //pop과 다르게 꺼내지않기때문에 -1을 해주지않는다.
+	}
+}
+int main(){
+	StackType s;  //s는 일반적인 구조체변수
+	init(&s);    //초기화
+	push(&s, 10);
+	push(&s, 20);
+	push(&s, 30);
+	push(&s, 40);
+	push(&s, 50);
+	push(&s, 60);  //오버플로되므로 호출안됨
+	printf("현재스택의 탑값: %d \n",peek(&s));    //50
+	//for문을 이용한 스택값출력
+	for(int i=0; i<=s.top; i++){         //10 20 30 40 50
+	   printf("%d \n",s.stack[i]);
+	}
+
+	//pop으로 스택값 출력
+	int item;
+	for(int i=0; i<MAX_STACK_SIZE; i++){    //50 40 30 20 10
+		item= pop(&s);
+	    printf("pop value: %d \n", item);
+	}
+	//display(&s);
+  
+
+}
