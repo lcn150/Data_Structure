@@ -1,0 +1,70 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef int element;
+typedef struct QueueNode{
+	element item;
+	struct QueueNode* link;
+}QueueNode;
+typedef struct{
+	QueueNode* front, *rear;
+}QueueType;
+void error(const char* message){
+	printf("%s \n", message);
+	exit(1);
+}
+void init(QueueType* q){
+	q->front = q->rear =NULL;
+}
+int is_empty(QueueType* q){
+	return q->front == NULL;
+}
+void enqueue(QueueType* q, element item){
+	QueueNode* temp = (QueueNode*)malloc(sizeof(QueueNode));
+	if(temp==NULL){
+		error("메모리할당 실패");
+	}
+	else{
+		temp->item = item;
+		temp->link = NULL;
+		if(is_empty(q)){    //큐가 비어있을 때 첫노드인 경우
+		     q->rear = temp;
+		     q->front = temp;
+		}
+		q->rear->link = temp;
+		q->rear = temp;
+	}
+}
+void display(QueueType* q){
+	QueueNode* tmp = q->front;
+	while(tmp!=NULL){
+		printf("%d\n", tmp->item);
+		tmp =tmp->link;
+	}
+}
+element dequeue(QueueType* q){
+	QueueNode* temp =q->front;
+	element item;
+	if(is_empty(q)){   //언더플로
+		error("큐가 비어있습니다");
+	}
+	else{
+		item = temp->item;  //q->front->item
+		q->front = q->front->link;
+		free(temp);
+                if(q->front ==NULL)  //마지막의 큐 삭제했을경우
+			q->rear =NULL;
+	}
+	return item;
+}
+int main(){
+	QueueType q;
+	init(&q);
+	enqueue(&q, 10);   //리스트는 오버플로가 없음
+	enqueue(&q, 20);
+	enqueue(&q, 30);
+	enqueue(&q, 40);
+        display(&q);
+
+	printf("dequeue = %d \n", dequeue(&q));
+	display(&q);
+}
