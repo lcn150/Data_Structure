@@ -1,0 +1,160 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef int element;
+typedef struct ListNode {
+	element data;
+	struct ListNode* link;
+}ListNode;
+ListNode* create_node(element data, ListNode* link) {
+	ListNode* new_node;
+	new_node = (ListNode*)malloc(sizeof(ListNode));
+	new_node->data = data;
+	new_node->link = link;
+	return new_node;
+}
+void insert_node(ListNode* *phead, ListNode* p, ListNode* new_node) {
+	if (*phead == NULL) {
+		*phead = new_node;
+	}
+	else if (p == NULL) {
+		new_node->link = *phead;
+		*phead = new_node;
+	}
+	else { //중간에 끼워지는 
+		new_node->link = p->link;      //new_node->link = p->link;
+		p->link = new_node;           //p->link = new_node;
+	}
+}
+void display(ListNode* head) {
+	ListNode* p;
+	p = head;
+	while (p != NULL) {
+		printf("%d \n", p->data);
+		p = p->link;
+	}
+	printf("\n");
+}
+void display_recur(ListNode* head) {   //2번째 display함수
+	ListNode* p = head;
+	if (p != NULL) {
+		printf("%d \n", p->data);
+		display_recur(p->link);        //재귀함수  사용
+	}
+}
+void remove_node(ListNode* *phead, ListNode* p, ListNode* removed) {
+	if (p == NULL) {
+		*phead = (*phead)->link;
+	}
+	else { //임의의 노드 삭제 주소2개 필요
+		p->link = removed->link;         //p->link = removed->link;
+	}
+	free(removed); //메모리 반환
+}
+ListNode* search(ListNode* head, element x) {
+	ListNode* p = head;
+	while (p != NULL) {
+		if (p->data == x) {
+			return p;
+		}
+		else {
+			p = p->link;
+		}
+	}
+	return p;  //NULL
+}
+ListNode* concat(ListNode* head1, ListNode* head2) {    //2개의 리스트 연결
+	ListNode* p;
+	if (head1 == NULL)               //head1이 NULL인 경우
+		return head2;
+	else if (head2 == NULL)          //head2가 NULL인 경우
+		return head1;
+	else {                           //head1과head2를 붙이기 
+		p = head1;
+		while (p->link != NULL) {     //p가 가리키는 노드의 link가 NULL이 아닌경우
+			p = p->link;      //p가 list1의 마지막노드에 도달
+		}
+		p->link = head2;      //p가 가리키는 노드의 link에 head2의 주소를 넣는다.
+		return head1;       //list1의 시작 head1을 반환
+	}
+}
+ListNode* reverse(ListNode* head) {
+	ListNode* p, *q, *r;
+	p = head;
+	q = NULL;
+	while (p != NULL) {
+		r = q;
+		q = p;
+		p = p->link;
+		q->link = r;
+	}
+	return q;
+}
+void removed_node(ListNode* *phead, ListNode*p) {
+	ListNode* removed;
+	if (p == NULL) {
+		removed = (*phead);
+		*phead = (*phead)->link;
+	}
+	else {
+		removed = p->link;
+		p->link = removed->link;
+	}
+	free(removed);
+}
+int sum(ListNode* head) {
+	ListNode* p = head;
+	int sum=0;
+	while (p != NULL) {
+		sum += p->data;
+		p = p->link;
+	}
+	return sum;
+}
+int count(ListNode* head, element x) {
+	ListNode* p = head;
+	int count = 0;
+	while (p != NULL) {
+		if (p->data == x)
+			count++;
+		p = p->link;
+	}
+	return count;
+}
+int main() {
+	ListNode* list1 = NULL;
+	ListNode* list2 = NULL;    //list2 생성
+	insert_node(&list1, NULL, create_node(10, NULL));
+	insert_node(&list1, NULL, create_node(20, NULL));
+	insert_node(&list1, NULL, create_node(30, NULL));
+	display(list1);    //30 20 10
+
+	removed_node(&list1, NULL);
+	remove_node(&list1, NULL, list1);
+	display(list1);   //while문사용     10
+
+	display_recur(list1);  //재귀함수사용 
+	insert_node(&list2, NULL, create_node(70, NULL));    //list2 생성
+	insert_node(&list2, NULL, create_node(80, NULL));
+	display(list2);    //10 80 70
+
+	list1 = concat(list1, list2);   //2개의 리스트를 연결하는 concat함수, 반환값이 있다.
+	display(list1);       //합쳐진 list1과 list2  10 80 70
+
+	list1 = reverse(list1);   //리스트를 거꾸로
+	display(list1);     //70 80 10
+
+
+	//데이터 탐색
+
+	/*int x;
+	printf("리스트1에서 찾고자하는 값은?:");
+	scanf("%d ",&x);
+	ListNode* p = search(list1, x);
+	if(p==NULL){
+		printf("%d : 데이터없음", x);
+	}
+	else{
+		printf("데이터 %d이 있습니다", p->data);
+	}
+	*/
+}
