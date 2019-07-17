@@ -1,0 +1,115 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef struct{    //행과 열
+	short r;
+	short c;
+}element;
+
+typedef struct StackNode{ //평범한 노드 생성
+	element data;
+	struct StackNode* link;
+}StackNode;
+typedef struct{
+	StackNode* top; //스택을 가리키는 top포인터 생성
+}LinkedStackType;
+
+void init(LinkedStackType* s){
+	s->top = NULL;  //배열에서는 s->top =-1
+}
+
+void push(LinkedStackType* s, element item){
+	StackNode* temp = (StackNode*)malloc(sizeof(StackNode)); //item을 넣기위해 temp생성
+	if(temp ==NULL){    //오버플로는 아니다
+		printf("메모리 할당 에러 \n");
+		return;
+	}
+	else{
+    	temp->data = item;
+	    temp->link =s->top;
+     	s->top = temp;
+	}
+}
+void display(LinkedStackType* s){
+    StackNode* tmp = s->top;  //StackNode로 선언된tmp가 s와 호환
+	while(tmp !=NULL){
+		printf("%d -> ",tmp->data);
+		tmp = tmp->link;
+	}
+}
+int is_empty(LinkedStackType* s){
+	return (s->top ==NULL);
+}
+element pop(LinkedStackType* s){
+	if(is_empty(s)){ //스택의 언더플로 체크
+		printf("스택 언더플로 에러!!\n");
+		exit(1);
+	}
+	else{
+		StackNode* temp = s->top;
+		element item = temp->data;    //30
+		s->top = s->top->link;     //temp->data;
+		free(temp);
+		return item;
+	}
+}
+element peek(LinkedStackType* s){
+	if(is_empty(s)){ //스택의 언더플로 체크
+		printf("스택 언더플로 에러!!\n");
+		exit(1);
+	}
+	else{
+		StackNode* temp = s->top;
+		element item = temp->data;    //30
+		return item;
+	}
+}
+element here = {1,0}, entry = {1,0};    //처음위치와 시작점
+
+char maze[6][6] = {
+	{'1','1','1','1','1','1'},
+	{'e','0','1','0','0','1'},
+	{'1','0','0','0','1','1'},
+	{'1','0','1','0','1','1'},
+	{'1','0','1','0','0','x'},
+	{'1','1','1','1','1','1'}
+};
+void push_loc(LinkedStackType* s, int r, int c){
+	if(r<0 || c<0)
+		return;
+	if(maze[r][c] !='1'&& maze[r][c] !='-'){   
+		element tmp;
+		tmp.r = r;      //앞으로 전진
+		tmp.c = c;      //아래로 전진
+		push(s, tmp);
+	}
+}
+int main(){
+	int r, c;
+	LinkedStackType s;
+	init(&s);
+	here = entry;
+	while(maze[here.r][here.c] != 'x'){ //도착할때까지
+		r = here.r;
+		c = here.c;
+		maze[r][c] = '-';  //방문하면 -로 바뀜
+		push_loc(&s, r-1, c);  //상하좌우 알맞게왔는지 검사
+		push_loc(&s, r+1, c);
+		push_loc(&s, r, c-1);
+		push_loc(&s, r, c+1);
+		if(is_empty(&s)){
+			printf("미로탈출실패\n");
+			return 0;
+		}
+		else{
+			here = pop(&s);
+		}
+	}
+	printf("미로 탈출성공"); 
+        for(int i=0; i<6; i++){
+		for(int j=0; j<6; j++){
+	             printf("%c", maze[i][j]);
+		}
+		printf("\n");
+	}
+}
